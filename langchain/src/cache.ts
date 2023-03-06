@@ -3,9 +3,7 @@ import { Generation } from "./llms/index.js";
 
 // Takes in an arbitrary number of strings and returns a hash of them
 // that can be used as a key in a cache.
-export const getKey = (...strings: string[]): string => {
-  return hash(strings);
-};
+export const getKey = (...strings: string[]): string => hash(strings);
 
 export abstract class BaseCache<T = Generation[]> {
   abstract lookup(key: string): T | undefined;
