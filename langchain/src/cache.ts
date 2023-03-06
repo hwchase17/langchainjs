@@ -1,13 +1,9 @@
-import crypto from "crypto";
+import hash from "object-hash";
 import { Generation } from "./llms/index.js";
 
 // Takes in an arbitrary number of strings and returns a hash of them
 // that can be used as a key in a cache.
-export const getKey = (...strings: string[]): string => {
-  const hash = crypto.createHash("sha256");
-  strings.forEach((s) => hash.update(s));
-  return hash.digest("hex");
-};
+export const getKey = (...strings: string[]): string => hash(strings);
 
 export abstract class BaseCache<T = Generation[]> {
   abstract lookup(key: string): T | undefined;
