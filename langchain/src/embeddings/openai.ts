@@ -1,4 +1,9 @@
-import { Configuration, OpenAIApi, CreateEmbeddingRequest } from "openai";
+import { 
+  Configuration,
+  OpenAIApi,
+  CreateEmbeddingRequest,
+  ConfigurationParameters
+} from "openai";
 import { backOff } from "exponential-backoff";
 import fetchAdapter from "../util/axios-fetch-adapter.js";
 import { chunkArray } from "../util/index.js";
@@ -15,9 +20,9 @@ export class OpenAIEmbeddings extends Embeddings implements ModelParams {
 
   maxRetries = 6;
 
-  private apiKey: string;
-
   private client: OpenAIApi;
+
+  private clientConfig: ConfigurationParameters;
 
   constructor(
     fields?: Partial<ModelParams> & {
@@ -25,7 +30,8 @@ export class OpenAIEmbeddings extends Embeddings implements ModelParams {
       batchSize?: number;
       maxRetries?: number;
       openAIApiKey?: string;
-    }
+    },
+    configuration?: ConfigurationParameters
   ) {
     super();
 
@@ -36,8 +42,12 @@ export class OpenAIEmbeddings extends Embeddings implements ModelParams {
 
     this.modelName = fields?.modelName ?? this.modelName;
     this.batchSize = fields?.batchSize ?? this.batchSize;
-    this.apiKey = apiKey;
     this.maxRetries = fields?.maxRetries ?? this.maxRetries;
+
+    this.clientConfig = {
+      apiKey,
+      ...configuration,
+    };
   }
 
   async embedDocuments(texts: string[]): Promise<number[][]> {
@@ -70,8 +80,11 @@ export class OpenAIEmbeddings extends Embeddings implements ModelParams {
   private async embeddingWithRetry(request: CreateEmbeddingRequest) {
     if (!this.client) {
       const clientConfig = new Configuration({
-        apiKey: this.apiKey,
-        baseOptions: { adapter: fetchAdapter },
+        ...this.clientConfig,
+        baseOptions: {
+          ...this.clientConfig.baseOptions,
+          adapter: fetchAdapter 
+        },
       });
       this.client = new OpenAIApi(clientConfig);
     }
