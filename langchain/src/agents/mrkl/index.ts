@@ -108,7 +108,6 @@ export class ZeroShotAgent extends Agent {
     const chain = new LLMChain({ prompt, llm });
     return new ZeroShotAgent({
       llmChain: chain,
-      allowedTools: tools.map((t) => t.name),
     });
   }
 
