@@ -1,8 +1,8 @@
-import { 
+import {
   Configuration,
   OpenAIApi,
   CreateEmbeddingRequest,
-  ConfigurationParameters
+  ConfigurationParameters,
 } from "openai";
 import { backOff } from "exponential-backoff";
 import fetchAdapter from "../util/axios-fetch-adapter.js";
@@ -83,7 +83,7 @@ export class OpenAIEmbeddings extends Embeddings implements ModelParams {
         ...this.clientConfig,
         baseOptions: {
           ...this.clientConfig.baseOptions,
-          adapter: fetchAdapter 
+          adapter: fetchAdapter,
         },
       });
       this.client = new OpenAIApi(clientConfig);
