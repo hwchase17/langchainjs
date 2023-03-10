@@ -9,6 +9,7 @@ export { initializeAgentExecutor } from "./initialize.js";
 export { loadAgent } from "./load.js";
 
 export {
+  Toolkit,
   SqlToolkit,
   JsonToolkit,
   RequestsToolkit,
