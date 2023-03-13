@@ -2,7 +2,7 @@ import jsonpointer from "jsonpointer";
 
 import { TextLoader } from "./text.js";
 
-export class JSONLoader extends TextLoader {
+export class JSONPointerLoader extends TextLoader {
   constructor(filePath: string, public pointer: string = "") {
     super(filePath);
   }
