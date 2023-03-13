@@ -19,34 +19,57 @@ abstract class BaseCallbackHandlerMethods {
   handleLLMStart?(
     llm: { name: string },
     prompts: string[],
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void | unknown>;
+
+  handleLLMNewToken?(
+    token: string,
+    runId: symbol,
     verbose?: boolean
   ): Promise<void>;
 
-  handleLLMNewToken?(token: string, verbose?: boolean): Promise<void>;
+  handleLLMError?(err: Error, runId: symbol, verbose?: boolean): Promise<void>;
 
-  handleLLMError?(err: Error, verbose?: boolean): Promise<void>;
-
-  handleLLMEnd?(output: LLMResult, verbose?: boolean): Promise<void>;
+  handleLLMEnd?(
+    output: LLMResult,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void>;
 
   handleChainStart?(
     chain: { name: string },
     inputs: ChainValues,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void | unknown>;
+
+  handleChainError?(
+    err: Error,
+    runId: symbol,
     verbose?: boolean
   ): Promise<void>;
 
-  handleChainError?(err: Error, verbose?: boolean): Promise<void>;
-
-  handleChainEnd?(outputs: ChainValues, verbose?: boolean): Promise<void>;
+  handleChainEnd?(
+    outputs: ChainValues,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void>;
 
   handleToolStart?(
     tool: { name: string },
     input: string,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void | unknown>;
+
+  handleToolError?(err: Error, runId: symbol, verbose?: boolean): Promise<void>;
+
+  handleToolEnd?(
+    output: string,
+    runId: symbol,
     verbose?: boolean
   ): Promise<void>;
-
-  handleToolError?(err: Error, verbose?: boolean): Promise<void>;
-
-  handleToolEnd?(output: string, verbose?: boolean): Promise<void>;
 
   handleText?(text: string, verbose?: boolean): Promise<void>;
 
@@ -101,12 +124,13 @@ export class CallbackManager extends BaseCallbackManager {
   async handleLLMStart(
     llm: { name: string },
     prompts: string[],
-    verbose?: boolean
-  ): Promise<void> {
+    runId = Symbol("LLM"),
+    verbose = false
+  ): Promise<symbol> {
     for (const handler of this.handlers) {
       if (!handler.ignoreLLM && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleLLMStart?.(llm, prompts);
+          await handler.handleLLMStart?.(llm, prompts, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleLLMStart: ${err}`
@@ -114,13 +138,18 @@ export class CallbackManager extends BaseCallbackManager {
         }
       }
     }
+    return runId;
   }
 
-  async handleLLMNewToken(token: string, verbose?: boolean): Promise<void> {
+  async handleLLMNewToken(
+    token: string,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreLLM && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleLLMNewToken?.(token);
+          await handler.handleLLMNewToken?.(token, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleLLMNewToken: ${err}`
@@ -130,11 +159,15 @@ export class CallbackManager extends BaseCallbackManager {
     }
   }
 
-  async handleLLMError(err: Error, verbose?: boolean): Promise<void> {
+  async handleLLMError(
+    err: Error,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreLLM && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleLLMError?.(err);
+          await handler.handleLLMError?.(err, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleLLMError: ${err}`
@@ -144,11 +177,15 @@ export class CallbackManager extends BaseCallbackManager {
     }
   }
 
-  async handleLLMEnd(output: LLMResult, verbose?: boolean): Promise<void> {
+  async handleLLMEnd(
+    output: LLMResult,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreLLM && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleLLMEnd?.(output);
+          await handler.handleLLMEnd?.(output, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleLLMEnd: ${err}`
@@ -161,12 +198,13 @@ export class CallbackManager extends BaseCallbackManager {
   async handleChainStart(
     chain: { name: string },
     inputs: ChainValues,
-    verbose?: boolean
-  ): Promise<void> {
+    runId = Symbol("Chain"),
+    verbose = false
+  ): Promise<symbol> {
     for (const handler of this.handlers) {
       if (!handler.ignoreChain && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleChainStart?.(chain, inputs);
+          await handler.handleChainStart?.(chain, inputs, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleChainStart: ${err}`
@@ -174,13 +212,18 @@ export class CallbackManager extends BaseCallbackManager {
         }
       }
     }
+    return runId;
   }
 
-  async handleChainError(err: Error, verbose?: boolean): Promise<void> {
+  async handleChainError(
+    err: Error,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreChain && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleChainError?.(err);
+          await handler.handleChainError?.(err, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleChainError: ${err}`
@@ -190,11 +233,15 @@ export class CallbackManager extends BaseCallbackManager {
     }
   }
 
-  async handleChainEnd(output: ChainValues, verbose?: boolean): Promise<void> {
+  async handleChainEnd(
+    output: ChainValues,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreChain && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleChainEnd?.(output);
+          await handler.handleChainEnd?.(output, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleChainEnd: ${err}`
@@ -207,12 +254,13 @@ export class CallbackManager extends BaseCallbackManager {
   async handleToolStart(
     tool: { name: string },
     input: string,
-    verbose?: boolean
-  ): Promise<void> {
+    runId = Symbol("Tool"),
+    verbose = false
+  ): Promise<symbol> {
     for (const handler of this.handlers) {
       if (!handler.ignoreAgent && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleToolStart?.(tool, input);
+          await handler.handleToolStart?.(tool, input, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleToolStart: ${err}`
@@ -220,13 +268,18 @@ export class CallbackManager extends BaseCallbackManager {
         }
       }
     }
+    return runId;
   }
 
-  async handleToolError(err: Error, verbose?: boolean): Promise<void> {
+  async handleToolError(
+    err: Error,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreAgent && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleToolError?.(err);
+          await handler.handleToolError?.(err, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleToolError: ${err}`
@@ -236,11 +289,15 @@ export class CallbackManager extends BaseCallbackManager {
     }
   }
 
-  async handleToolEnd(output: string, verbose?: boolean): Promise<void> {
+  async handleToolEnd(
+    output: string,
+    runId: symbol,
+    verbose?: boolean
+  ): Promise<void> {
     for (const handler of this.handlers) {
       if (!handler.ignoreAgent && (verbose || handler.alwaysVerbose)) {
         try {
-          await handler.handleToolEnd?.(output);
+          await handler.handleToolEnd?.(output, runId);
         } catch (err) {
           console.error(
             `Error in handler ${handler.constructor.name}, handleToolEnd: ${err}`
@@ -325,6 +382,7 @@ export class ConsoleCallbackHandler extends BaseCallbackHandler {
   async handleChainStart(
     chain: { name: string },
     _inputs: ChainValues,
+    _runId: symbol,
     _verbose?: boolean
   ): Promise<void> {
     console.log(`Entering new ${chain.name} chain...`);
@@ -332,6 +390,7 @@ export class ConsoleCallbackHandler extends BaseCallbackHandler {
 
   async handleChainEnd(
     _output: ChainValues,
+    _runId: symbol,
     _verbose?: boolean
   ): Promise<void> {
     console.log("Finished chain.");
@@ -344,7 +403,11 @@ export class ConsoleCallbackHandler extends BaseCallbackHandler {
     console.log(action.log);
   }
 
-  async handleToolEnd(output: string, _verbose?: boolean): Promise<void> {
+  async handleToolEnd(
+    output: string,
+    _runId: symbol,
+    _verbose?: boolean
+  ): Promise<void> {
     console.log(output);
   }
 
