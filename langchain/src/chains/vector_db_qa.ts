@@ -1,7 +1,7 @@
 import { BaseChain, SerializedBaseChain, loadQAStuffChain } from "./index.js";
 
 import { VectorStore } from "../vectorstores/base.js";
-import { BaseLLM } from "../llms/index.js";
+import { BaseLanguageModel } from "../base_language/index.js";
 
 import { resolveConfigFromFile } from "../util/index.js";
 import { ChainValues } from "../schema/index.js";
@@ -113,7 +113,7 @@ export class VectorDBQAChain extends BaseChain implements VectorDBQAChainInput {
   }
 
   static fromLLM(
-    llm: BaseLLM,
+    llm: BaseLanguageModel,
     vectorstore: VectorStore,
     options?: Partial<
       Omit<VectorDBQAChainInput, "combineDocumentsChain" | "vectorstore">
