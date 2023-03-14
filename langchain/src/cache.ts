@@ -1,3 +1,4 @@
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import crypto from "node:crypto";
 import type { RedisClientType } from "redis";
 import { Generation } from "./schema/index.js";
@@ -24,12 +25,14 @@ export abstract class BaseCache<T = Generation[]> {
   abstract update(prompt: string, llmKey: string, value: T): Promise<void>;
 }
 
+const GLOBAL_MAP = new Map();
+
 export class InMemoryCache<T = Generation[]> extends BaseCache<T> {
   #cache: Map<string, T>;
 
-  constructor() {
+  constructor(map?: Map<string, T>) {
     super();
-    this.#cache = new Map();
+    this.#cache = map ?? new Map();
   }
 
   lookup(prompt: string, llmKey: string): Promise<T | null> {
@@ -40,6 +43,10 @@ export class InMemoryCache<T = Generation[]> extends BaseCache<T> {
 
   async update(prompt: string, llmKey: string, value: T): Promise<void> {
     this.#cache.set(getCacheKey(prompt, llmKey), value);
+  }
+
+  static global(): InMemoryCache {
+    return new InMemoryCache(GLOBAL_MAP);
   }
 }
 
