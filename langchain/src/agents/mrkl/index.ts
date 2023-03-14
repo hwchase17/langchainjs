@@ -121,7 +121,9 @@ export class ZeroShotAgent extends Agent {
 
     const match = /Action: (.*)\nAction Input: (.*)/s.exec(text);
     if (!match) {
-      throw new Error(`Could not parse LLM output: ${text}`);
+      // assume no tool is needed
+      return { tool: "Final Answer", input: text };
+      //throw new Error(`Could not parse LLM output: ${text}`);
     }
 
     return {
