@@ -1,6 +1,6 @@
 import { BaseChain, ChainInputs } from "./index.js";
 
-import { BaseLLM, SerializedLLM } from "../llms/index.js";
+import { SerializedLLM } from "../llms/index.js";
 
 import { BaseMemory, BufferMemory } from "../memory/index.js";
 import {
@@ -107,7 +107,7 @@ export class LLMChain extends BaseChain implements LLMChainInput {
     >("prompt", data);
 
     return new LLMChain({
-      llm: await BaseLLM.deserialize(serializedLLM),
+      llm: await BaseLanguageModel.deserialize(serializedLLM),
       prompt: await BasePromptTemplate.deserialize(serializedPrompt),
     });
   }
@@ -115,7 +115,7 @@ export class LLMChain extends BaseChain implements LLMChainInput {
   serialize(): SerializedLLMChain {
     return {
       _type: this._chainType(),
-      // llm: this.llm.serialize(), TODO fix this now that llm is BaseLanguageModel
+      llm: this.llm.serialize(),
       prompt: this.prompt.serialize(),
     };
   }
