@@ -1,6 +1,7 @@
 import { Tool } from "./tools/index.js";
 import { AgentExecutor } from "./executor.js";
 import { ZeroShotAgent } from "./mrkl/index.js";
+import { ConversationalAgent } from "./conversational/index.js";
 import { ChatAgent } from "./chat/index.js";
 import { BaseLanguageModel } from "../base_language/index.js";
 import { CallbackManager, getCallbackManager } from "../callbacks/index.js";
@@ -20,6 +21,12 @@ export const initializeAgentExecutor = async (
         returnIntermediateSteps: true,
         verbose,
         callbackManager,
+      });
+    case "conversational-react-description":
+      return AgentExecutor.fromAgentAndTools({
+        agent: ConversationalAgent.fromLLMAndTools(llm, tools),
+        tools,
+        returnIntermediateSteps: true,
       });
     case "chat-zero-shot-react-description":
       return AgentExecutor.fromAgentAndTools({
