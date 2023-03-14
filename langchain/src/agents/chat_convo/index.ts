@@ -31,7 +31,7 @@ import {
   SerializedOutputParser,
 } from "../../output_parsers/base.js";
 
-export class AgentOutputParser extends BaseOutputParser {
+export class ChatConversationalAgentOutputParser extends BaseOutputParser {
   parse(text: string): unknown {
     const cleanedOutput = text.trim();
     let jsonOutput = cleanedOutput;
@@ -138,7 +138,7 @@ export class ChatConversationalAgent extends Agent {
     const {
       systemMessage = PREFIX,
       humanMessage = SUFFIX,
-      outputParser = new AgentOutputParser(),
+      outputParser = new ChatConversationalAgentOutputParser(),
     } = args ?? {};
     const toolStrings = tools
       .map((tool) => `${tool.name}: ${tool.description}`)
@@ -169,7 +169,8 @@ export class ChatConversationalAgent extends Agent {
     ChatConversationalAgent.validateTools(tools);
     const prompt = ChatConversationalAgent.createPrompt(tools, args);
     const chain = new LLMChain({ prompt, llm });
-    const { outputParser = new AgentOutputParser() } = args ?? {};
+    const { outputParser = new ChatConversationalAgentOutputParser() } =
+      args ?? {};
     return new ChatConversationalAgent(
       {
         llmChain: chain,

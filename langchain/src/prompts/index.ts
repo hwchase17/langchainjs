@@ -30,3 +30,4 @@ export {
   ChatMessagePromptTemplate,
   MessagesPlaceholder,
 } from "./chat.js";
+export { interpolateFString } from "./template.js";
