@@ -1,55 +1,37 @@
 import { test, expect } from "@jest/globals";
 import { Document } from "../../document.js";
-import {
-  BaseLanguageModel,
-  BaseLanguageModelParams,
-} from "../../base_language/index.js";
+import { BaseLLM } from "../../llms/index.js";
 import { loadQAMapReduceChain } from "../question_answering/load.js";
-import { BasePromptValue, LLMResult } from "../../schema/index.js";
+import { LLMResult } from "../../schema/index.js";
 
 test("Test MapReduceDocumentsChain", async () => {
   let nrMapCalls = 0;
   let nrReduceCalls = 0;
 
-  class FakeLLM extends BaseLanguageModel {
-    constructor(params: BaseLanguageModelParams) {
-      super(params);
-    }
-
-    _modelType(): string {
+  class FakeLLM extends BaseLLM {
+    _llmType(): string {
       return "fake";
     }
 
-    getNumTokens(_text: string): number {
-      return 0;
-    }
-
-    generatePrompt(
-      promptValues: BasePromptValue[],
-      _stop?: string[]
-    ): Promise<LLMResult> {
-      return new Promise((resolve) => {
-        resolve({
-          generations: promptValues.map((prompt) => {
-            let completion = "";
-            if (prompt.toString().startsWith("Use the following portion")) {
-              nrMapCalls += 1;
-              completion = "a portion of context";
-            } else if (
-              prompt.toString().startsWith("Given the following extracted")
-            ) {
-              nrReduceCalls += 1;
-              completion = "a final answer";
-            }
-            return [
-              {
-                text: completion,
-                score: 0,
-              },
-            ];
-          }),
-        });
-      });
+    async _generate(prompts: string[], _?: string[]): Promise<LLMResult> {
+      return {
+        generations: prompts.map((prompt) => {
+          let completion = "";
+          if (prompt.startsWith("Use the following portion")) {
+            nrMapCalls += 1;
+            completion = "a portion of context";
+          } else if (prompt.startsWith("Given the following extracted")) {
+            nrReduceCalls += 1;
+            completion = "a final answer";
+          }
+          return [
+            {
+              text: completion,
+              score: 0,
+            },
+          ];
+        }),
+      };
     }
   }
 
