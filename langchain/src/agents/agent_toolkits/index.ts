@@ -5,6 +5,7 @@ export {
   OpenApiToolkit,
   createOpenApiAgent,
 } from "./openapi/openapi.js";
+export { Toolkit } from "./base.js";
 export {
   VectorStoreInfo,
   VectorStoreToolkit,
