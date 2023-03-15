@@ -129,11 +129,6 @@ Current conversation:
 Human: {input}
 AI:`;
 
-const defaultPrompt = new PromptTemplate({
-  template: defaultTemplate,
-  inputVariables: ["history", "input"],
-});
-
 export class ConversationChain extends LLMChain {
   constructor(fields: {
     llm: BaseLanguageModel;
@@ -142,7 +137,12 @@ export class ConversationChain extends LLMChain {
     memory?: BaseMemory;
   }) {
     super({
-      prompt: fields.prompt ?? defaultPrompt,
+      prompt:
+        fields.prompt ??
+        new PromptTemplate({
+          template: defaultTemplate,
+          inputVariables: ["history", "input"],
+        }),
       llm: fields.llm,
       outputKey: fields.outputKey ?? "response",
     });
